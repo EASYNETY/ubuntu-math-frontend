@@ -6,7 +6,7 @@ import Layout from '../components/Layout';
 import { booksAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { SampleReaderModal } from '../components/SampleReader';
-import CheckoutModal from '../components/payment/CheckoutModal';
+import PaymentGatewayModal from '../components/payment/PaymentGatewayModal';
 
 const INTER = "'Inter', ui-sans-serif, system-ui, sans-serif";
 const BUNDLE_PRICE = 499.99;
@@ -47,10 +47,13 @@ export default function BooksPage() {
 
   const handleBuyBundle = async () => {
     if (!user) { window.location.href = '/login'; return; }
-    try {
-      const { data } = await booksAPI.initPayment({ userId: user._id, bundle: true, email: user.email });
-      if (data.url) window.location.href = data.url;
-    } catch (e) { console.error(e); }
+    // Open EvriPay checkout modal for bundle
+    setCheckoutModal({
+      itemType: 'book',
+      itemId: 'bundle-15-books',
+      itemName: 'Complete 15-Book Bundle',
+      amount: BUNDLE_PRICE
+    });
   };
 
   const handleBuyBook = async (book) => {
@@ -73,9 +76,9 @@ export default function BooksPage() {
 
   return (
     <Layout>
-      {/* EvriPay Checkout Modal */}
+      {/* Payment Gateway Selection Modal */}
       {checkoutModal && (
-        <CheckoutModal
+        <PaymentGatewayModal
           isOpen={true}
           onClose={() => setCheckoutModal(null)}
           {...checkoutModal}

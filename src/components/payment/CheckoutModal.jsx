@@ -1,13 +1,15 @@
-import React, { useState } from 'react';
-import { X, Copy, CheckCircle, Clock } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { X, Copy, CheckCircle, Clock, Check, AlertCircle } from 'lucide-react';
 import axios from 'axios';
 
 const CheckoutModal = ({ isOpen, onClose, itemType, itemId, itemName, amount }) => {
-  const [step, setStep] = useState('confirm'); // confirm, instructions, checking
+  const [step, setStep] = useState('confirm'); // confirm, instructions, checking, confirmed
   const [paymentData, setPaymentData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [copied, setCopied] = useState({});
+  const [pollingCount, setPollingCount] = useState(0);
+  const [showManualConfirm, setShowManualConfirm] = useState(false);
 
   const initiatePayment = async () => {
     setLoading(true);
@@ -40,6 +42,7 @@ const CheckoutModal = ({ isOpen, onClose, itemType, itemId, itemName, amount }) 
     if (!paymentData) return;
 
     setStep('checking');
+    setPollingCount(0);
 
     const checkStatus = async () => {
       try {
@@ -50,14 +53,24 @@ const CheckoutModal = ({ isOpen, onClose, itemType, itemId, itemName, amount }) 
         );
 
         if (response.data.status === 'completed') {
-          alert('Payment successful! You now have access to ' + itemName);
-          onClose();
-          window.location.reload();
+          setStep('success');
+          setTimeout(() => {
+            onClose();
+            window.location.reload();
+          }, 3000);
         } else if (response.data.status === 'failed') {
           setError('Payment failed. Please try again.');
           setStep('instructions');
         } else {
-          // Still pending, check again after 20 seconds
+          // Still pending, increment counter
+          setPollingCount(prev => prev + 1);
+          
+          // Show manual confirm button after 20 seconds (1 poll)
+          if (pollingCount >= 0) {
+            setShowManualConfirm(true);
+          }
+          
+          // Continue polling
           setTimeout(checkStatus, 20000);
         }
       } catch (err) {
@@ -67,6 +80,10 @@ const CheckoutModal = ({ isOpen, onClose, itemType, itemId, itemName, amount }) 
     };
 
     checkStatus();
+  };
+
+  const handleManualConfirm = () => {
+    setStep('confirmed');
   };
 
   if (!isOpen) return null;
@@ -216,8 +233,71 @@ const CheckoutModal = ({ isOpen, onClose, itemType, itemId, itemName, amount }) 
           {step === 'checking' && (
             <div className="text-center py-8">
               <Clock className="animate-spin mx-auto mb-4 text-blue-600" size={48} />
-              <p className="text-lg font-semibold text-gray-900 mb-2">Checking payment status...</p>
-              <p className="text-gray-600">This may take a few moments</p>
+              <p className="text-lg font-semibold text-gray-900 mb-2">Verifying your payment...</p>
+              <p className="text-gray-600 mb-6">Checking with the bank. This usually takes a few seconds.</p>
+              
+              {/* Show "I have made payment" button after 20 seconds */}
+              {showManualConfirm && (
+                <div className="mt-6">
+                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
+                    <p className="text-sm text-gray-700">
+                      <AlertCircle className="inline w-4 h-4 mr-1" />
+                      Still waiting for confirmation? If you've already made the payment, click below.
+                    </p>
+                  </div>
+                  <button
+                    onClick={handleManualConfirm}
+                    className="px-6 py-3 bg-[#E95420] text-white rounded-lg hover:bg-[#c94418] font-semibold"
+                  >
+                    I Have Made the Payment
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+
+          {step === 'confirmed' && (
+            <div className="text-center py-8">
+              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Check className="w-8 h-8 text-blue-600" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">Payment Confirmation Received</h3>
+              <p className="text-gray-600 mb-6 max-w-md mx-auto">
+                Thank you! We've noted that you've made the payment. Your order will be fulfilled as soon as we confirm receipt of funds from the bank.
+              </p>
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6 max-w-md mx-auto">
+                <p className="text-sm text-gray-700">
+                  <strong>What happens next?</strong><br/>
+                  • We'll verify your payment with the bank<br/>
+                  • You'll receive an email confirmation<br/>
+                  • Access will be granted automatically<br/>
+                  • Usually takes 5-30 minutes
+                </p>
+              </div>
+              <div className="space-y-3">
+                <p className="text-sm text-gray-500">
+                  You can safely close this window and continue browsing.
+                </p>
+                <button
+                  onClick={onClose}
+                  className="px-8 py-3 bg-gray-900 text-white rounded-lg hover:bg-gray-800 font-semibold"
+                >
+                  Close & Continue
+                </button>
+              </div>
+            </div>
+          )}
+
+          {step === 'success' && (
+            <div className="text-center py-8">
+              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <CheckCircle className="w-8 h-8 text-green-600" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">Payment Successful!</h3>
+              <p className="text-gray-600 mb-4">
+                You now have access to <strong>{itemName}</strong>
+              </p>
+              <p className="text-sm text-gray-500">Redirecting in 3 seconds...</p>
             </div>
           )}
         </div>

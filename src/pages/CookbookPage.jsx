@@ -5,7 +5,7 @@ import { Beaker, CheckCircle, ShoppingCart, Download, AlertTriangle, ChevronDown
 import Layout from '../components/Layout';
 import { marketplaceAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
-import CheckoutModal from '../components/payment/CheckoutModal';
+import PaymentGatewayModal from '../components/payment/PaymentGatewayModal';
 
 const INTER = "'Inter', ui-sans-serif, system-ui, sans-serif";
 
@@ -92,9 +92,9 @@ export default function CookbookPage() {
 
   return (
     <Layout>
-      {/* EvriPay Checkout Modal */}
+      {/* Payment Gateway Selection Modal */}
       {checkoutModal && (
-        <CheckoutModal
+        <PaymentGatewayModal
           isOpen={true}
           onClose={() => setCheckoutModal(null)}
           {...checkoutModal}
