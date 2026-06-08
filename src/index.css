@@ -1,0 +1,63 @@
+@import "tailwindcss/index.css";
+
+@theme {
+  --color-ubuntu-orange: #E95420;
+  --color-ubuntu-green: #38A169;
+  --color-ubuntu-blue: #2D6EAA;
+  --color-ubuntu-purple: #7B2D8B;
+  --color-ubuntu-dark: #0a0f18;
+  /* Register Inter as the default sans font */
+  --font-family-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+}
+
+@layer base {
+  * { box-sizing: border-box; }
+
+  html {
+    font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  }
+
+  body {
+    font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background: linear-gradient(135deg, #dbeafe 0%, #eff6ff 40%, #f3e8ff 100%);
+    background-attachment: fixed;
+    color: #1e293b;
+    min-height: 100vh;
+  }
+
+  /* Ensure font-black (900) renders correctly */
+  .font-black {
+    font-weight: 900 !important;
+    font-family: 'Inter', ui-sans-serif, system-ui, sans-serif !important;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  }
+
+  ::selection {
+    background-color: #E95420;
+    color: white;
+  }
+}
+
+@layer utilities {
+  .perspective-1000 { perspective: 1000px; }
+  .preserve-3d { transform-style: preserve-3d; }
+  .backface-hidden { backface-visibility: hidden; }
+  .animate-pulse-slow {
+    animation: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+  .text-ubuntu-orange { color: #E95420; }
+  .text-ubuntu-green  { color: #38A169; }
+  .text-ubuntu-blue   { color: #2D6EAA; }
+  .bg-ubuntu-orange   { background-color: #E95420; }
+  .bg-ubuntu-green    { background-color: #38A169; }
+  .bg-ubuntu-blue     { background-color: #2D6EAA; }
+  .bg-ubuntu-dark     { background-color: #0a0f18; }
+  .border-ubuntu-orange { border-color: #E95420; }
+  .accent-ubuntu-orange { accent-color: #E95420; }
+  .accent-ubuntu-blue   { accent-color: #2D6EAA; }
+}
