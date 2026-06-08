@@ -97,6 +97,13 @@ export const subscriptionsAPI = {
 
 // ── Payments ──────────────────────────────────────────────────────────────────
 export const paymentsAPI = {
+  // EvriPay (ZAR bank transfers)
+  initiate: (data) => api.post('/payments/initiate', data),
+  getStatus: (paymentId) => api.get(`/payments/${paymentId}/status`),
+  getHistory: (params) => api.get('/payments/history', { params }),
+  cancel: (paymentId) => api.post(`/payments/${paymentId}/cancel`),
+  
+  // Legacy Paystack/Stripe (keeping for backward compatibility)
   initPaystack: (data) => api.post('/payment/paystack/init', data),
   verifyPaystack: (data) => api.post('/payment/paystack/verify', data),
   initStripe: (data) => api.post('/payment/stripe/session', data),

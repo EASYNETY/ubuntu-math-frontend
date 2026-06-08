@@ -5,6 +5,7 @@ import { Beaker, CheckCircle, ShoppingCart, Download, AlertTriangle, ChevronDown
 import Layout from '../components/Layout';
 import { marketplaceAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import CheckoutModal from '../components/payment/CheckoutModal';
 
 const INTER = "'Inter', ui-sans-serif, system-ui, sans-serif";
 
@@ -65,25 +66,21 @@ export default function CookbookPage() {
   const [showAllRecipes, setShowAllRecipes] = useState(false);
   const [coupon, setCoupon] = useState('');
   const [couponResult, setCouponResult] = useState(null);
+  const [checkoutModal, setCheckoutModal] = useState(null);
 
   const visibleRecipes = showAllRecipes ? RECIPES : RECIPES.slice(0, 10);
 
   const handleBuy = async () => {
     if (!user) { navigate('/login'); return; }
-    setBuying(true);
-    try {
-      const finalAmount = couponResult?.valid ? parseFloat(couponResult.finalAmount) : 9.99;
-      const { data } = await marketplaceAPI.initPayment({
-        userId: user._id,
-        productId: 'cams-industrial-cookbook',
-        productType: 'industrial-cookbook',
-        email: user.email,
-        amount: finalAmount,
-        couponCode: couponResult?.valid ? coupon : undefined,
-      });
-      if (data.url) window.location.href = data.url;
-    } catch (e) { console.error(e); }
-    finally { setBuying(false); }
+    const finalAmount = couponResult?.valid ? parseFloat(couponResult.finalAmount) : 9.99;
+    
+    // Open EvriPay checkout modal
+    setCheckoutModal({
+      itemType: 'book', // Using 'book' type for general products
+      itemId: 'cams-industrial-cookbook',
+      itemName: 'CAMS Industrial Cookbook',
+      amount: finalAmount
+    });
   };
 
   const handleValidateCoupon = async () => {
@@ -95,6 +92,15 @@ export default function CookbookPage() {
 
   return (
     <Layout>
+      {/* EvriPay Checkout Modal */}
+      {checkoutModal && (
+        <CheckoutModal
+          isOpen={true}
+          onClose={() => setCheckoutModal(null)}
+          {...checkoutModal}
+        />
+      )}
+      
       {/* Hero */}
       <div className="border-b border-gray-200/60 bg-gradient-to-br from-orange-50 to-white overflow-hidden">
         <div className="max-w-6xl mx-auto px-6 py-16 relative z-10">

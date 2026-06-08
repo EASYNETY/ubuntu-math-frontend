@@ -10,6 +10,7 @@ import {
 import Layout from '../components/Layout';
 import { marketplaceAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import CheckoutModal from '../components/payment/CheckoutModal';
 
 const INTER = "'Inter', ui-sans-serif, system-ui, sans-serif";
 
@@ -95,6 +96,7 @@ export default function PatentDossierPage() {
   const [buying, setBuying] = useState(false);
   const [openFaq, setOpenFaq] = useState(null);
   const [hasPurchased, setHasPurchased] = useState(false);
+  const [checkoutModal, setCheckoutModal] = useState(null);
 
   useEffect(() => {
     marketplaceAPI.getPatentDossier()
@@ -123,7 +125,6 @@ export default function PatentDossierPage() {
 
   const handleLicenseAccepted = async () => {
     setShowLicense(false);
-    setBuying(true);
     try {
       await marketplaceAPI.acceptLicense({
         userId: user._id,
@@ -135,18 +136,14 @@ export default function PatentDossierPage() {
 
       const finalAmount = couponResult?.valid ? parseFloat(couponResult.finalAmount) : 1000;
 
-      const { data } = await marketplaceAPI.initPayment({
-        userId: user._id,
-        productId: 'patent-dossier',
-        productType: 'patent-dossier',
-        email: user.email,
-        amount: finalAmount,
-        couponCode: couponResult?.valid ? coupon : undefined,
+      // Open EvriPay checkout modal
+      setCheckoutModal({
+        itemType: 'book', // Using 'book' type for general products
+        itemId: 'patent-dossier',
+        itemName: 'CAMS Industrial Patent Dossier',
+        amount: finalAmount
       });
-
-      if (data.url) window.location.href = data.url;
     } catch (e) { console.error(e); }
-    finally { setBuying(false); }
   };
 
   if (loading) return (
@@ -161,6 +158,15 @@ export default function PatentDossierPage() {
 
   return (
     <Layout>
+      {/* EvriPay Checkout Modal */}
+      {checkoutModal && (
+        <CheckoutModal
+          isOpen={true}
+          onClose={() => setCheckoutModal(null)}
+          {...checkoutModal}
+        />
+      )}
+      
       <AnimatePresence>
         {showLicense && <LicenseModal onAccept={handleLicenseAccepted} onClose={() => setShowLicense(false)} />}
       </AnimatePresence>
