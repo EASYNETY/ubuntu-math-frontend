@@ -6,7 +6,7 @@ import {
   Beaker, MessageSquare, Upload, TrendingUp, Shield, ArrowLeft,
   Menu, X, Trash2, RefreshCw, Check, ExternalLink, Activity,
   Plus, Edit2, Save, XCircle, Pin,
-  Star, Hash, ShoppingCart, Download, AlertTriangle,
+  Star, Hash, ShoppingCart, Download, AlertTriangle, DollarSign,
 } from 'lucide-react';
 import {
   adminAPI, coursesAPI, googleAPI, booksAPI, essaysAPI,
@@ -30,6 +30,7 @@ const TABS = [
   { id: 'processes',  label: 'Industrial Processes', icon: Beaker        },
   { id: 'community',  label: 'Community',            icon: MessageSquare },
   { id: 'sales',      label: 'Sales & Revenue',      icon: TrendingUp    },
+  { id: 'payments',   label: 'Payment Management',   icon: DollarSign    },
   { id: 'import',     label: 'Import Courses',       icon: Upload        },
   { id: 'analytics',  label: 'Deep Analytics',       icon: BarChart3     },
 ];
@@ -1792,6 +1793,59 @@ export default function AdminPage() {
 
             {/* ── Sales & Revenue ── */}
             {tab === 'sales' && <SalesDashboardSection />}
+
+            {/* ── Payment Management ── */}
+            {tab === 'payments' && (
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                <div className="flex items-center justify-between mb-6">
+                  <h1 className="text-2xl sm:text-4xl font-black">Payment Management</h1>
+                  <Link 
+                    to="/admin/payments" 
+                    className="flex items-center gap-2 px-4 py-2 bg-[#E95420] text-white rounded-xl font-bold text-sm hover:bg-[#c94418] transition-colors"
+                  >
+                    <ExternalLink size={16} />
+                    Open Full Dashboard
+                  </Link>
+                </div>
+                
+                <div className="bg-slate-900/50 border border-white/10 rounded-2xl p-5 sm:p-8">
+                  <p className="text-slate-400 mb-4">
+                    Manage bank transfer payments, approve pending transactions, and track payment history.
+                  </p>
+                  
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                    <div className="bg-slate-800/50 border border-white/10 rounded-xl p-4">
+                      <div className="text-yellow-500 text-sm font-bold mb-1">Pending</div>
+                      <div className="text-3xl font-black text-white">-</div>
+                    </div>
+                    <div className="bg-slate-800/50 border border-white/10 rounded-xl p-4">
+                      <div className="text-green-500 text-sm font-bold mb-1">Completed</div>
+                      <div className="text-3xl font-black text-white">-</div>
+                    </div>
+                    <div className="bg-slate-800/50 border border-white/10 rounded-xl p-4">
+                      <div className="text-red-500 text-sm font-bold mb-1">Failed</div>
+                      <div className="text-3xl font-black text-white">-</div>
+                    </div>
+                    <div className="bg-slate-800/50 border border-white/10 rounded-xl p-4">
+                      <div className="text-blue-500 text-sm font-bold mb-1">Total Revenue</div>
+                      <div className="text-3xl font-black text-white">-</div>
+                    </div>
+                  </div>
+                  
+                  <div className="bg-blue-900/20 border border-blue-500/30 rounded-xl p-4 flex items-start gap-3">
+                    <Activity className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
+                    <div className="text-sm text-blue-300">
+                      <p className="font-bold mb-1">Bank Transfer Payment Flow</p>
+                      <p className="text-blue-400/80">
+                        Customers receive FNB bank details with unique references. 
+                        Payments require manual approval after bank confirmation.
+                        Click "Open Full Dashboard" to manage all payments.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            )}
 
           </div>
         </main>

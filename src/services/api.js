@@ -103,6 +103,11 @@ export const paymentsAPI = {
   getHistory: (params) => api.get('/payments/history', { params }),
   cancel: (paymentId) => api.post(`/payments/${paymentId}/cancel`),
   
+  // Admin
+  getAllPayments: (params) => api.get('/admin/payments', { params }),
+  approvePayment: (paymentId, data) => api.post(`/admin/payments/${paymentId}/approve`, data),
+  rejectPayment: (paymentId, data) => api.post(`/admin/payments/${paymentId}/reject`, data),
+  
   // Legacy Paystack/Stripe (keeping for backward compatibility)
   initPaystack: (data) => api.post('/payment/paystack/init', data),
   verifyPaystack: (data) => api.post('/payment/paystack/verify', data),

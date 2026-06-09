@@ -27,6 +27,7 @@ import MarketplacePage from './pages/MarketplacePage';
 import PatentDossierPage from './pages/PatentDossierPage';
 import CustomerLibraryPage from './pages/CustomerLibraryPage';
 import CookbookPage from './pages/CookbookPage';
+import AdminPaymentsPage from './pages/AdminPaymentsPage';
 
 function ProtectedRoute({ children, adminOnly = false }) {
   const { user } = useAuth();
@@ -72,6 +73,7 @@ function AppRoutes() {
       <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
       <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
       <Route path="/admin" element={<ProtectedRoute adminOnly><AdminPage /></ProtectedRoute>} />
+      <Route path="/admin/payments" element={<ProtectedRoute adminOnly><AdminPaymentsPage /></ProtectedRoute>} />
 
       <Route path="*" element={<NotFoundPage />} />
     </Routes>
