@@ -37,7 +37,9 @@ const CheckoutModal = ({ isOpen, onClose, itemType, itemId, itemName, amount }) 
       setPaymentData(response.data);
       setStep('instructions');
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to initiate payment');
+      console.error('Payment initiation error:', err);
+      console.error('Error response:', err.response?.data);
+      setError(err.response?.data?.message || err.message || 'Failed to initiate payment');
     } finally {
       setLoading(false);
     }
