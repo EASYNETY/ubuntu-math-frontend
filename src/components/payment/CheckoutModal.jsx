@@ -30,7 +30,7 @@ const CheckoutModal = ({ isOpen, onClose, itemType, itemId, itemName, amount }) 
 
       const response = await axios.post(
         `${import.meta.env.VITE_API_URL}/api/payments/initiate`,
-        { itemType, itemId, amount, userId: user._id },
+        { itemType, itemId, amount, userId: user._id, itemName },
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
