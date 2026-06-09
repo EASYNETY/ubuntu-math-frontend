@@ -22,7 +22,7 @@ export default function ProfilePage() {
   const fetchPayments = async () => {
     try {
       setLoadingPayments(true);
-      const { data } = await paymentsAPI.getPaymentHistory({
+      const { data } = await paymentsAPI.getHistory({
         userId: user._id,
         limit: 20
       });
