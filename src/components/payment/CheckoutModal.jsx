@@ -19,10 +19,18 @@ const CheckoutModal = ({ isOpen, onClose, itemType, itemId, itemName, amount }) 
     setError(null);
 
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('auth_token');
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      
+      if (!user._id) {
+        setError('Please log in to continue');
+        setLoading(false);
+        return;
+      }
+
       const response = await axios.post(
         `${import.meta.env.VITE_API_URL}/api/payments/initiate`,
-        { itemType, itemId, amount },
+        { itemType, itemId, amount, userId: user._id },
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
@@ -50,9 +58,11 @@ const CheckoutModal = ({ isOpen, onClose, itemType, itemId, itemName, amount }) 
 
     const checkStatus = async () => {
       try {
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem('auth_token');
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        
         const response = await axios.get(
-          `${import.meta.env.VITE_API_URL}/api/payments/${paymentData.paymentId}/status`,
+          `${import.meta.env.VITE_API_URL}/api/payments/${paymentData.paymentId}/status?userId=${user._id}`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
 
