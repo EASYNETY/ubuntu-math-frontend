@@ -7,10 +7,12 @@ import {
   Menu, X, Trash2, RefreshCw, Check, ExternalLink, Activity,
   Plus, Edit2, Save, XCircle, Pin,
   Star, Hash, ShoppingCart, Download, AlertTriangle, DollarSign,
+  CheckCircle, Clock, Search, Filter,
 } from 'lucide-react';
 import {
   adminAPI, coursesAPI, googleAPI, booksAPI, essaysAPI,
   processesAPI, communityAPI, storiesAPI, modulesAPI, marketplaceAPI,
+  paymentsAPI,
 } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import FileUploader from '../components/FileUploader';
@@ -1269,6 +1271,225 @@ function SalesDashboardSection() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Payment Management Section
+// ─────────────────────────────────────────────────────────────────────────────
+
+function PaymentManagementSection() {
+  const { user } = useAuth();
+  const [payments, setPayments] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusCounts, setStatusCounts] = useState({});
+  const [actionLoading, setActionLoading] = useState(false);
+
+  const fetchPayments = useCallback(async () => {
+    try {
+      setLoading(true);
+      const { data } = await paymentsAPI.getAllPayments({
+        status: statusFilter,
+        search: searchTerm,
+        limit: 100
+      });
+      setPayments(data.payments);
+      setStatusCounts(data.statusCounts);
+    } catch (error) {
+      console.error('Error fetching payments:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [statusFilter, searchTerm]);
+
+  useEffect(() => {
+    fetchPayments();
+  }, [fetchPayments]);
+
+  const handleApprove = async (paymentId) => {
+    if (!confirm('Approve this payment and grant access to the customer?')) return;
+    
+    try {
+      setActionLoading(true);
+      await paymentsAPI.approvePayment(paymentId, { adminUserId: user._id });
+      alert('Payment approved! Customer access granted.');
+      fetchPayments();
+    } catch (error) {
+      alert('Error approving payment: ' + (error.response?.data?.message || error.message));
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleReject = async (paymentId) => {
+    const reason = prompt('Enter rejection reason:');
+    if (!reason) return;
+    
+    try {
+      setActionLoading(true);
+      await paymentsAPI.rejectPayment(paymentId, { adminUserId: user._id, reason });
+      alert('Payment rejected.');
+      fetchPayments();
+    } catch (error) {
+      alert('Error rejecting payment: ' + (error.response?.data?.message || error.message));
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const getStatusBadge = (status) => {
+    const styles = {
+      pending: 'bg-yellow-900/50 text-yellow-300 border-yellow-500/30',
+      completed: 'bg-green-900/50 text-green-300 border-green-500/30',
+      failed: 'bg-red-900/50 text-red-300 border-red-500/30',
+      cancelled: 'bg-slate-700/50 text-slate-300 border-slate-500/30'
+    };
+    return (
+      <span className={`px-3 py-1 rounded-full text-xs font-black border ${styles[status] || styles.pending}`}>
+        {status.toUpperCase()}
+      </span>
+    );
+  };
+
+  if (loading) return <Spinner />;
+
+  return (
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+      <SectionHeader title="Payment Management" onRefresh={fetchPayments} />
+
+      <div className="space-y-6">
+        {/* Status Summary */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          {[
+            { key: 'all', label: 'All', icon: <Filter className="text-blue-400 w-4 h-4" />, color: 'blue' },
+            { key: 'pending', label: 'Pending', icon: <Clock className="text-yellow-400 w-4 h-4" />, color: 'yellow' },
+            { key: 'completed', label: 'Completed', icon: <CheckCircle className="text-green-400 w-4 h-4" />, color: 'green' },
+            { key: 'failed', label: 'Failed', icon: <XCircle className="text-red-400 w-4 h-4" />, color: 'red' }
+          ].map(status => (
+            <div
+              key={status.key}
+              onClick={() => setStatusFilter(status.key)}
+              className={`cursor-pointer p-4 rounded-2xl border-2 transition-all ${
+                statusFilter === status.key
+                  ? `border-${status.color}-500 bg-${status.color}-900/30`
+                  : 'border-white/10 bg-slate-900/50 hover:border-white/20'
+              }`}
+            >
+              {status.icon}
+              <p className="text-2xl font-black text-white mt-2">
+                {statusCounts[status.key === 'all' ? undefined : status.key] || 0}
+              </p>
+              <p className="text-sm text-slate-400">{status.label}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* Search */}
+        <div className="relative">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
+          <input
+            type="text"
+            placeholder="Search by reference, payment ID, or item name..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full bg-slate-900/50 border border-white/10 rounded-2xl pl-12 pr-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-[#E95420]/50"
+          />
+        </div>
+
+        {/* Payments Table */}
+        {payments.length === 0 ? (
+          <div className="text-center py-20 bg-slate-900/50 border border-white/10 rounded-2xl">
+            <Clock className="w-12 h-12 text-slate-600 mx-auto mb-4" />
+            <p className="text-slate-500">No payments found</p>
+          </div>
+        ) : (
+          <div className="bg-slate-900/50 border border-white/10 rounded-2xl overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="bg-slate-800/50 text-slate-500 text-xs uppercase">
+                  <tr>
+                    <th className="px-4 py-3 text-left font-bold tracking-wider">Date</th>
+                    <th className="px-4 py-3 text-left font-bold tracking-wider">Reference</th>
+                    <th className="px-4 py-3 text-left font-bold tracking-wider">Customer</th>
+                    <th className="px-4 py-3 text-left font-bold tracking-wider">Item</th>
+                    <th className="px-4 py-3 text-right font-bold tracking-wider">Amount</th>
+                    <th className="px-4 py-3 text-center font-bold tracking-wider">Status</th>
+                    <th className="px-4 py-3 text-center font-bold tracking-wider">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-white/5">
+                  {payments.map((payment) => (
+                    <motion.tr
+                      key={payment._id}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      className="hover:bg-white/5"
+                    >
+                      <td className="px-4 py-4 text-slate-400 text-xs">
+                        {new Date(payment.createdAt).toLocaleDateString()}
+                        <br />
+                        <span className="text-slate-600">
+                          {new Date(payment.createdAt).toLocaleTimeString()}
+                        </span>
+                      </td>
+                      <td className="px-4 py-4">
+                        <code className="text-xs font-mono bg-slate-800 text-slate-300 px-2 py-1 rounded">
+                          {payment.reference}
+                        </code>
+                      </td>
+                      <td className="px-4 py-4">
+                        <div className="font-bold text-white">
+                          {payment.userId?.name || 'Unknown'}
+                        </div>
+                        <div className="text-xs text-slate-500">
+                          {payment.userId?.email || '-'}
+                        </div>
+                      </td>
+                      <td className="px-4 py-4 text-slate-300">
+                        {payment.itemName}
+                      </td>
+                      <td className="px-4 py-4 text-right">
+                        <span className="font-black text-white">
+                          {payment.amountFormatted}
+                        </span>
+                      </td>
+                      <td className="px-4 py-4 text-center">
+                        {getStatusBadge(payment.status)}
+                      </td>
+                      <td className="px-4 py-4 text-center">
+                        {payment.status === 'pending' && (
+                          <div className="flex items-center justify-center gap-2">
+                            <button
+                              onClick={() => handleApprove(payment.paymentId)}
+                              disabled={actionLoading}
+                              className="px-3 py-1.5 bg-green-600 text-white rounded-lg text-xs font-bold hover:bg-green-700 disabled:opacity-50 transition-colors"
+                            >
+                              Approve
+                            </button>
+                            <button
+                              onClick={() => handleReject(payment.paymentId)}
+                              disabled={actionLoading}
+                              className="px-3 py-1.5 bg-red-600 text-white rounded-lg text-xs font-bold hover:bg-red-700 disabled:opacity-50 transition-colors"
+                            >
+                              Reject
+                            </button>
+                          </div>
+                        )}
+                        {payment.status !== 'pending' && (
+                          <span className="text-xs text-slate-600">-</span>
+                        )}
+                      </td>
+                    </motion.tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+      </div>
+    </motion.div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Spinner
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -1795,57 +2016,7 @@ export default function AdminPage() {
             {tab === 'sales' && <SalesDashboardSection />}
 
             {/* ── Payment Management ── */}
-            {tab === 'payments' && (
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                <div className="flex items-center justify-between mb-6">
-                  <h1 className="text-2xl sm:text-4xl font-black">Payment Management</h1>
-                  <Link 
-                    to="/admin/payments" 
-                    className="flex items-center gap-2 px-4 py-2 bg-[#E95420] text-white rounded-xl font-bold text-sm hover:bg-[#c94418] transition-colors"
-                  >
-                    <ExternalLink size={16} />
-                    Open Full Dashboard
-                  </Link>
-                </div>
-                
-                <div className="bg-slate-900/50 border border-white/10 rounded-2xl p-5 sm:p-8">
-                  <p className="text-slate-400 mb-4">
-                    Manage bank transfer payments, approve pending transactions, and track payment history.
-                  </p>
-                  
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                    <div className="bg-slate-800/50 border border-white/10 rounded-xl p-4">
-                      <div className="text-yellow-500 text-sm font-bold mb-1">Pending</div>
-                      <div className="text-3xl font-black text-white">-</div>
-                    </div>
-                    <div className="bg-slate-800/50 border border-white/10 rounded-xl p-4">
-                      <div className="text-green-500 text-sm font-bold mb-1">Completed</div>
-                      <div className="text-3xl font-black text-white">-</div>
-                    </div>
-                    <div className="bg-slate-800/50 border border-white/10 rounded-xl p-4">
-                      <div className="text-red-500 text-sm font-bold mb-1">Failed</div>
-                      <div className="text-3xl font-black text-white">-</div>
-                    </div>
-                    <div className="bg-slate-800/50 border border-white/10 rounded-xl p-4">
-                      <div className="text-blue-500 text-sm font-bold mb-1">Total Revenue</div>
-                      <div className="text-3xl font-black text-white">-</div>
-                    </div>
-                  </div>
-                  
-                  <div className="bg-blue-900/20 border border-blue-500/30 rounded-xl p-4 flex items-start gap-3">
-                    <Activity className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
-                    <div className="text-sm text-blue-300">
-                      <p className="font-bold mb-1">Bank Transfer Payment Flow</p>
-                      <p className="text-blue-400/80">
-                        Customers receive FNB bank details with unique references. 
-                        Payments require manual approval after bank confirmation.
-                        Click "Open Full Dashboard" to manage all payments.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </motion.div>
-            )}
+            {tab === 'payments' && <PaymentManagementSection />}
 
           </div>
         </main>
