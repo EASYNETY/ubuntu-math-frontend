@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { X, CreditCard, Building2, Wallet } from 'lucide-react';
+import { motion } from 'framer-motion';
 import CheckoutModal from './CheckoutModal';
+
+const INTER = "'Inter', ui-sans-serif, system-ui, sans-serif";
 
 const PaymentGatewayModal = ({ isOpen, onClose, itemType, itemId, itemName, amount }) => {
   const [selectedGateway, setSelectedGateway] = useState(null);
@@ -25,25 +28,35 @@ const PaymentGatewayModal = ({ isOpen, onClose, itemType, itemId, itemName, amou
   }
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl max-w-md w-full shadow-2xl">
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <motion.div 
+        initial={{ scale: 0.95, opacity: 0 }} 
+        animate={{ scale: 1, opacity: 1 }}
+        className="bg-white border border-gray-200 rounded-3xl max-w-lg w-full shadow-2xl overflow-hidden"
+      >
         {/* Header */}
-        <div className="flex justify-between items-center p-6 border-b border-gray-100">
-          <div>
-            <h2 className="text-2xl font-black text-gray-900">Select Payment Method</h2>
-            <p className="text-sm text-gray-500 mt-1">Choose how you want to pay</p>
+        <div className="p-6 border-b border-gray-100">
+          <div className="flex justify-between items-start">
+            <div>
+              <h2 style={{ fontWeight: 900, fontFamily: INTER }} className="text-2xl text-gray-900">
+                Select Payment Method
+              </h2>
+              <p className="text-gray-500 text-sm mt-1">Choose how you want to pay</p>
+            </div>
+            <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors">
+              <X size={24} />
+            </button>
           </div>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors">
-            <X size={24} />
-          </button>
         </div>
 
         {/* Content */}
         <div className="p-6">
+          {/* Purchase Summary */}
           <div className="mb-6">
-            <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-4 rounded-xl border border-blue-100">
-              <p className="font-semibold text-gray-900">{itemName}</p>
-              <p className="text-3xl font-black text-blue-600 mt-2">
+            <div className="bg-gradient-to-r from-[#E95420]/10 to-[#2D6EAA]/10 p-4 rounded-2xl border border-gray-200/60">
+              <p className="text-gray-700 text-sm mb-1">You're purchasing:</p>
+              <p style={{ fontWeight: 900, fontFamily: INTER }} className="text-gray-900 text-lg">{itemName}</p>
+              <p style={{ fontWeight: 900, fontFamily: INTER }} className="text-[#E95420] text-3xl mt-2">
                 R {amount.toLocaleString('en-ZA', { minimumFractionDigits: 2 })}
               </p>
             </div>
@@ -54,91 +67,97 @@ const PaymentGatewayModal = ({ isOpen, onClose, itemType, itemId, itemName, amou
             {/* EvriPay - Bank Transfer */}
             <button
               onClick={() => setSelectedGateway('evripay')}
-              className="w-full p-4 border-2 border-gray-200 rounded-xl hover:border-[#E95420] hover:bg-orange-50 transition-all text-left group"
+              className="w-full p-5 border-2 border-gray-200 rounded-2xl hover:border-[#E95420] hover:bg-orange-50 transition-all text-left group"
             >
               <div className="flex items-start gap-4">
-                <div className="w-12 h-12 bg-[#E95420] rounded-lg flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
-                  <Building2 className="w-6 h-6 text-white" />
+                <div className="w-14 h-14 bg-[#E95420] rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform shadow-lg">
+                  <Building2 className="w-7 h-7 text-white" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="font-black text-gray-900">Bank Transfer (EvriPay)</h3>
+                  <h3 style={{ fontWeight: 900, fontFamily: INTER }} className="text-gray-900 text-lg">
+                    Bank Transfer (EvriPay)
+                  </h3>
                   <p className="text-sm text-gray-600 mt-1">
-                    Pay via EFT/Bank Transfer • FNB Account
+                    Pay via EFT or Bank Transfer to FNB Account
                   </p>
-                  <div className="flex items-center gap-2 mt-2">
-                    <span className="text-xs font-bold text-[#E95420] bg-orange-100 px-2 py-0.5 rounded">
-                      Instant Verification
+                  <div className="flex items-center gap-2 mt-2 flex-wrap">
+                    <span className="text-xs font-black text-white bg-[#E95420] px-2 py-1 rounded-lg">
+                      ⚡ Instant Verification
                     </span>
-                    <span className="text-xs text-gray-500">• ZAR Currency</span>
+                    <span className="text-xs font-bold text-gray-600">• South African Rand (ZAR)</span>
                   </div>
                 </div>
               </div>
             </button>
 
             {/* Coming Soon Options */}
-            <div className="relative">
+            <div className="relative opacity-50">
               <button
                 disabled
-                className="w-full p-4 border-2 border-gray-100 rounded-xl text-left opacity-50 cursor-not-allowed"
+                className="w-full p-5 border-2 border-gray-100 rounded-2xl text-left cursor-not-allowed"
               >
                 <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 bg-gray-200 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <CreditCard className="w-6 h-6 text-gray-400" />
+                  <div className="w-14 h-14 bg-gray-200 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <CreditCard className="w-7 h-7 text-gray-400" />
                   </div>
                   <div className="flex-1">
-                    <h3 className="font-black text-gray-700">Card Payment</h3>
+                    <h3 style={{ fontWeight: 900, fontFamily: INTER }} className="text-gray-700 text-lg">
+                      Card Payment
+                    </h3>
                     <p className="text-sm text-gray-500 mt-1">
                       Credit/Debit Card via Paystack
                     </p>
-                    <span className="text-xs font-bold text-gray-400 bg-gray-100 px-2 py-0.5 rounded mt-2 inline-block">
+                    <span className="text-xs font-bold text-gray-400 bg-gray-100 px-2 py-1 rounded-lg mt-2 inline-block">
                       Coming Soon
                     </span>
                   </div>
                 </div>
               </button>
-              <div className="absolute top-2 right-2">
-                <span className="bg-yellow-100 text-yellow-800 text-xs font-bold px-2 py-1 rounded">
+              <div className="absolute top-3 right-3">
+                <span className="bg-yellow-100 text-yellow-800 text-xs font-black px-3 py-1 rounded-full">
                   Soon
                 </span>
               </div>
             </div>
 
-            <div className="relative">
+            <div className="relative opacity-50">
               <button
                 disabled
-                className="w-full p-4 border-2 border-gray-100 rounded-xl text-left opacity-50 cursor-not-allowed"
+                className="w-full p-5 border-2 border-gray-100 rounded-2xl text-left cursor-not-allowed"
               >
                 <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 bg-gray-200 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <Wallet className="w-6 h-6 text-gray-400" />
+                  <div className="w-14 h-14 bg-gray-200 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <Wallet className="w-7 h-7 text-gray-400" />
                   </div>
                   <div className="flex-1">
-                    <h3 className="font-black text-gray-700">Digital Wallet</h3>
+                    <h3 style={{ fontWeight: 900, fontFamily: INTER }} className="text-gray-700 text-lg">
+                      Digital Wallet
+                    </h3>
                     <p className="text-sm text-gray-500 mt-1">
                       PayPal, Apple Pay, Google Pay
                     </p>
-                    <span className="text-xs font-bold text-gray-400 bg-gray-100 px-2 py-0.5 rounded mt-2 inline-block">
+                    <span className="text-xs font-bold text-gray-400 bg-gray-100 px-2 py-1 rounded-lg mt-2 inline-block">
                       Coming Soon
                     </span>
                   </div>
                 </div>
               </button>
-              <div className="absolute top-2 right-2">
-                <span className="bg-yellow-100 text-yellow-800 text-xs font-bold px-2 py-1 rounded">
+              <div className="absolute top-3 right-3">
+                <span className="bg-yellow-100 text-yellow-800 text-xs font-black px-3 py-1 rounded-full">
                   Soon
                 </span>
               </div>
             </div>
           </div>
 
-          {/* Info */}
-          <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-100">
-            <p className="text-xs text-gray-600">
-              <span className="font-bold text-gray-900">🔒 Secure Payment:</span> All transactions are encrypted and secure. Your payment information is never stored on our servers.
+          {/* Security Info */}
+          <div className="mt-6 p-4 bg-blue-50 rounded-2xl border border-blue-100">
+            <p className="text-xs text-gray-700">
+              <span style={{ fontWeight: 900, fontFamily: INTER }}>🔒 Secure Payment:</span> All transactions are encrypted. Your payment information is never stored on our servers.
             </p>
           </div>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 };
