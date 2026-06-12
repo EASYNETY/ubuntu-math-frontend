@@ -74,6 +74,7 @@ export default function BookDetailPage() {
         <SampleReaderModal
           sampleUrl={book.sampleChapterUrl}
           bookTitle={book.title}
+          purchased={purchased}
           onClose={() => setShowSample(false)}
         />
       )}
@@ -212,6 +213,7 @@ export default function BookDetailPage() {
                     <SampleReader
                       sampleUrl={book.sampleChapterUrl}
                       bookTitle={book.title}
+                      purchased={purchased}
                     />
                   </div>
                 </motion.div>

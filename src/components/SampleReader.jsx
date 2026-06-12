@@ -32,7 +32,7 @@ function formatChapters(raw) {
 }
 
 // ── Main component ────────────────────────────────────────────────────────────
-export default function SampleReader({ sampleUrl, bookTitle, onClose, isModal = false }) {
+export default function SampleReader({ sampleUrl, bookTitle, onClose, isModal = false, purchased = false }) {
   const [raw, setRaw] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -194,19 +194,21 @@ export default function SampleReader({ sampleUrl, bookTitle, onClose, isModal = 
                 })}
               </div>
 
-              {/* Paywall teaser at end */}
-              <div className="mt-12 relative">
-                {/* Fade overlay */}
-                <div className="absolute -top-16 left-0 right-0 h-16 bg-gradient-to-b from-transparent to-[#0f1520] pointer-events-none" />
-                <div className="bg-gradient-to-r from-[#E95420]/10 to-[#2D6EAA]/10 border border-[#E95420]/20 rounded-2xl p-6 text-center">
-                  <Lock className="w-8 h-8 text-[#E95420] mx-auto mb-3" />
-                  <p className="font-black text-white mb-1">Continue Reading</p>
-                  <p className="text-sm text-slate-400 mb-4">
-                    Purchase the full book to access all chapters.
-                  </p>
-                  <p className="text-2xl font-black text-[#E95420]">$39.99</p>
+              {/* Paywall teaser at end - only show for non-purchased users */}
+              {!purchased && (
+                <div className="mt-12 relative">
+                  {/* Fade overlay */}
+                  <div className="absolute -top-16 left-0 right-0 h-16 bg-gradient-to-b from-transparent to-[#0f1520] pointer-events-none" />
+                  <div className="bg-gradient-to-r from-[#E95420]/10 to-[#2D6EAA]/10 border border-[#E95420]/20 rounded-2xl p-6 text-center">
+                    <Lock className="w-8 h-8 text-[#E95420] mx-auto mb-3" />
+                    <p className="font-black text-white mb-1">Continue Reading</p>
+                    <p className="text-sm text-slate-400 mb-4">
+                      Purchase the full book to access all chapters.
+                    </p>
+                    <p className="text-2xl font-black text-[#E95420]">$39.99</p>
+                  </div>
                 </div>
-              </div>
+              )}
             </motion.div>
           </AnimatePresence>
         )}
@@ -235,7 +237,7 @@ export default function SampleReader({ sampleUrl, bookTitle, onClose, isModal = 
 }
 
 // ── Modal wrapper ─────────────────────────────────────────────────────────────
-export function SampleReaderModal({ sampleUrl, bookTitle, onClose }) {
+export function SampleReaderModal({ sampleUrl, bookTitle, onClose, purchased = false }) {
   return (
     <AnimatePresence>
       <motion.div
@@ -256,6 +258,7 @@ export function SampleReaderModal({ sampleUrl, bookTitle, onClose }) {
             sampleUrl={sampleUrl}
             bookTitle={bookTitle}
             onClose={onClose}
+            purchased={purchased}
             isModal
           />
         </motion.div>
