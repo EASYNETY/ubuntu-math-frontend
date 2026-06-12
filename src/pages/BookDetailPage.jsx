@@ -73,6 +73,7 @@ export default function BookDetailPage() {
       {showSample && sampleMode === 'modal' && (
         <SampleReaderModal
           sampleUrl={book.sampleChapterUrl}
+          fullContentUrl={book.fullContentUrl}
           bookTitle={book.title}
           purchased={purchased}
           onClose={() => setShowSample(false)}
@@ -137,7 +138,7 @@ export default function BookDetailPage() {
                         : 'bg-gray-100 border-gray-200 text-gray-600 hover:bg-gray-200'
                     }`}>
                     <Eye className="w-3.5 h-3.5" />
-                    {showSample && sampleMode === 'inline' ? 'Hide' : 'Read'} Sample
+                    {showSample && sampleMode === 'inline' ? 'Hide' : purchased ? 'Read' : 'Read Sample'}
                   </button>
                   <button
                     onClick={() => { setSampleMode('modal'); setShowSample(true); }}
@@ -212,6 +213,7 @@ export default function BookDetailPage() {
                   <div className="border border-[#2D6EAA]/30 rounded-2xl overflow-hidden">
                     <SampleReader
                       sampleUrl={book.sampleChapterUrl}
+                      fullContentUrl={book.fullContentUrl}
                       bookTitle={book.title}
                       purchased={purchased}
                     />

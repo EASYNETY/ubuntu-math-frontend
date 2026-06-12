@@ -1,5 +1,7 @@
 /**
- * SampleReader — renders sample chapter text beautifully in-app.
+ * SampleReader / BookReader — renders book content beautifully in-app.
+ * - For non-purchased users: Shows sample chapters (1-3) with paywall
+ * - For purchased users: Shows ALL chapters from fullContentUrl
  * Fetches plain text from Cloudinary, formats it with chapter headings,
  * and provides a download button.
  */
@@ -32,7 +34,7 @@ function formatChapters(raw) {
 }
 
 // ── Main component ────────────────────────────────────────────────────────────
-export default function SampleReader({ sampleUrl, bookTitle, onClose, isModal = false, purchased = false }) {
+export default function SampleReader({ sampleUrl, fullContentUrl, bookTitle, onClose, isModal = false, purchased = false }) {
   const [raw, setRaw] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -40,24 +42,30 @@ export default function SampleReader({ sampleUrl, bookTitle, onClose, isModal = 
   const [fontSize, setFontSize] = useState(16);
   const contentRef = useRef(null);
 
+  // Use fullContentUrl if user has purchased, otherwise use sampleUrl
+  const contentUrl = purchased && fullContentUrl ? fullContentUrl : sampleUrl;
+  const isFullBook = purchased && fullContentUrl;
+
   useEffect(() => {
-    if (!sampleUrl) { setError('No sample available'); setLoading(false); return; }
+    if (!contentUrl) { setError('No content available'); setLoading(false); return; }
     setLoading(true);
-    fetch(sampleUrl)
+    setActiveChapter(0); // Reset to first chapter when content changes
+    fetch(contentUrl)
       .then(r => {
-        if (!r.ok) throw new Error('Failed to load sample');
+        if (!r.ok) throw new Error('Failed to load content');
         return r.text();
       })
       .then(text => { setRaw(text); setLoading(false); })
       .catch(e => { setError(e.message); setLoading(false); });
-  }, [sampleUrl]);
+  }, [contentUrl]);
 
   const chapters = formatChapters(raw);
 
   const handleDownload = () => {
     const a = document.createElement('a');
-    a.href = sampleUrl;
-    a.download = `${bookTitle?.replace(/[^a-z0-9]/gi, '-').toLowerCase()}-sample-chapters.txt`;
+    a.href = contentUrl;
+    const suffix = isFullBook ? 'full-book' : 'sample-chapters';
+    a.download = `${bookTitle?.replace(/[^a-z0-9]/gi, '-').toLowerCase()}-${suffix}.txt`;
     a.target = '_blank';
     a.click();
   };
@@ -87,8 +95,11 @@ export default function SampleReader({ sampleUrl, bookTitle, onClose, isModal = 
           <div className="min-w-0">
             <p className="font-black text-white text-sm truncate">{bookTitle}</p>
             <p className="text-xs text-slate-500">
-              Sample Preview — Chapters 1–3
-              {chapters.length > 0 && ` · Chapter ${activeChapter + 1} of ${chapters.length}`}
+              {isFullBook ? (
+                `Full Book — All Chapters${chapters.length > 0 ? ` · Chapter ${activeChapter + 1} of ${chapters.length}` : ''}`
+              ) : (
+                `Sample Preview — Chapters 1–3${chapters.length > 0 ? ` · Chapter ${activeChapter + 1} of ${chapters.length}` : ''}`
+              )}
             </p>
           </div>
         </div>
@@ -171,7 +182,7 @@ export default function SampleReader({ sampleUrl, bookTitle, onClose, isModal = 
                 </span>
                 <h2 className="text-2xl font-black text-white">{bookTitle}</h2>
                 <p className="text-sm text-slate-500 mt-1">
-                  Sample Preview · {chapters[activeChapter].paragraphs.length} paragraphs
+                  {isFullBook ? 'Full Book' : 'Sample Preview'} · {chapters[activeChapter].paragraphs.length} paragraphs
                 </p>
               </div>
 
@@ -237,7 +248,7 @@ export default function SampleReader({ sampleUrl, bookTitle, onClose, isModal = 
 }
 
 // ── Modal wrapper ─────────────────────────────────────────────────────────────
-export function SampleReaderModal({ sampleUrl, bookTitle, onClose, purchased = false }) {
+export function SampleReaderModal({ sampleUrl, fullContentUrl, bookTitle, onClose, purchased = false }) {
   return (
     <AnimatePresence>
       <motion.div
@@ -256,6 +267,7 @@ export function SampleReaderModal({ sampleUrl, bookTitle, onClose, purchased = f
         >
           <SampleReader
             sampleUrl={sampleUrl}
+            fullContentUrl={fullContentUrl}
             bookTitle={bookTitle}
             onClose={onClose}
             purchased={purchased}
