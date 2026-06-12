@@ -246,13 +246,16 @@ export default function LibraryPage() {
                         )}
                       </div>
                       <h3 className="font-bold text-gray-900 mb-2">
-                        {product.product?.title || product.productType}
+                        {product.product?.title || product.productType || 'Marketplace Product'}
                       </h3>
-                      <p className="text-sm text-gray-600 mb-2">
+                      <p className="text-sm text-gray-600 mb-2 line-clamp-2">
+                        {product.product?.description || 'Premium digital content'}
+                      </p>
+                      <p className="text-xs text-gray-500 mb-2">
                         License: {product.licenseId?.substring(0, 16)}...
                       </p>
                       <p className="text-xs text-gray-500 mb-4">
-                        Downloads: {product.downloadCount || 0} / {product.maxDownloads || 5}
+                        Downloads: {product.downloadCount || 0} / {product.maxDownloads || 100}
                       </p>
                       <button 
                         onClick={() => handleDownloadMarketplaceProduct(product)}
