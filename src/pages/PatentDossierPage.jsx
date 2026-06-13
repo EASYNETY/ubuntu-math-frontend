@@ -343,7 +343,7 @@ export default function PatentDossierPage() {
               </div>
 
               {hasPurchased ? (
-                <button onClick={() => navigate('/library')}
+                <button onClick={() => navigate('/my-library')}
                   className="w-full py-3.5 bg-[#38A169] text-white rounded-xl font-black hover:bg-[#2d8a57] transition-colors flex items-center justify-center gap-2">
                   <Download className="w-4 h-4" /> Go to My Library
                 </button>
