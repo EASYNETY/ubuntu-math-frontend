@@ -69,8 +69,11 @@ export default function LibraryPage() {
       });
 
       if (data.downloadUrl) {
-        alert(`📄 Your document is watermarked with:\n• Name: ${data.watermarkData?.name}\n• Email: ${data.watermarkData?.email}\n• Order: ${data.watermarkData?.orderId}\n\n${data.watermarkData?.notice}`);
+        // Open download FIRST (before alert) to avoid popup blocker
         window.open(data.downloadUrl, '_blank');
+        
+        // Then show watermark info
+        alert(`📄 Your document is watermarked with:\n• Name: ${data.watermarkData?.name}\n• Email: ${data.watermarkData?.email}\n• Order: ${data.watermarkData?.orderId}\n\n${data.watermarkData?.notice}`);
       }
     } catch (error) {
       console.error('Download error:', error);
